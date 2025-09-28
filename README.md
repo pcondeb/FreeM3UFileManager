@@ -23,9 +23,3 @@
 - 🎨 Friendly GUI built with Python & Kivy  
 
 ---
-
-## ⚡ Installation (Python version)
-
-1. Clone this repository:
-```bash
-git clone https://github.com/yourusername/FreeM3UFileManager.git
