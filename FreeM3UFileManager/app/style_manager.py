@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 from kivy.core.text import LabelBase
 
-# Registrar fuente similar a Segoe UI Symbol si está disponible
-
-
 class StyleManager:
     def __init__(self):
         try:

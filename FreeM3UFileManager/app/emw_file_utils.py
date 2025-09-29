@@ -33,6 +33,7 @@ def parse_m3u_to_dict(file_path):
                     "tvg-name": attrs.get("tvg-name", ""),
                     "tvg-logo": attrs.get("tvg-logo", ""),
                     "tvg-shift": attrs.get("tvg-shift", ""),
+                    "tvg-url": attrs.get("tvg-url", ""),
                     "radio": attrs.get("radio", ""),
                     "catchup": attrs.get("catchup", ""),
                     "catchup-source": attrs.get("catchup-source", ""),
@@ -69,7 +70,7 @@ def write_m3u_recursive(ref, f):
 
 def channel_to_extinf(ch):
     attrs = []
-    for key in ["tvg-id", "tvg-name", "tvg-logo", "tvg-shift", "radio", "catchup", "catchup-source", "catchup-days", "group-title"]:
+    for key in ["tvg-id", "tvg-name", "tvg-logo", "tvg-url", "tvg-shift", "radio", "catchup", "catchup-source", "catchup-days", "group-title"]:
         val = ch.get(key)
         if val:
             attrs.append(f'{key}="{val}"')

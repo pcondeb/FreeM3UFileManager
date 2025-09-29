@@ -50,22 +50,22 @@ class EditorMainWindow(ThemedScreen):
         self.config = config
         self.plugin_manager = plugin_manager
 
-        # modo oscuro
+        # dark mode control
         self.dark_mode = self.config.get_bool("dark_mode", True) if self.config else True
         style_manager.set_style(self.dark_mode)
         self.style = style_manager.get_style()
 
-        # cargar datos
+        # data load
         self.data = load_file(self.file_path, is_new)
 
-        # contenedor principal
+        # UI main container
         self.main_layout = BoxLayout(spacing=5, padding=5)
         self.add_widget(self.main_layout)
 
-        # construir UI
+        # Build UI
         self.setup_ui()
 
-        # aplicar theme
+        # Apply theme
         with self.canvas.before:
             self.set_theme()
 
@@ -74,7 +74,7 @@ class EditorMainWindow(ThemedScreen):
         Window.bind(on_resize=self.on_window_resize)
 
     # -----------------------
-    # Resize optimizado
+    # Resize Window
     # -----------------------
     def on_window_resize(self, window, width, height):
         if self._resize_event:
@@ -87,9 +87,6 @@ class EditorMainWindow(ThemedScreen):
         if hasattr(self, "editor_helper"):
             self.editor_helper.populate_list()
 
-    # -----------------------
-    # Layout según orientación
-    # -----------------------
     def update_layout_orientation(self):
         """Reorganiza layout según orientación de ventana"""
         self.main_layout.clear_widgets()
@@ -176,7 +173,7 @@ class EditorMainWindow(ThemedScreen):
 
         self.button_panel = BoxLayout(spacing=5, padding=5)
 
-        # Crear botones con icono
+        # Build buttons with icons
         self.add_btn = IconButton("app/icons/add.png")
         self.remove_btn = IconButton("app/icons/remove.png")
         self.copy_move_btn = IconButton("app/icons/copy.png")
@@ -189,7 +186,7 @@ class EditorMainWindow(ThemedScreen):
         self.import_btn = IconButton("app/icons/import.png")
         self.save_btn = IconButton("app/icons/save.png")
 
-        # Asignar callbacks
+        # Assign callbacks
         self.add_btn.bind(on_release=lambda x: self.add_popup())
         self.remove_btn.bind(on_release=lambda x: self.delete_selected())
         self.copy_move_btn.bind(on_release=lambda x: self.open_copy_move_menu())
@@ -275,9 +272,8 @@ class EditorMainWindow(ThemedScreen):
 
     def reorder_selected_items(self, direction="up"):
         """
-        Reordena los elementos seleccionados (canales o grupos) dentro del nivel actual
-        como bloque, manteniendo su orden relativo.
-        direction = "up" o "down"
+        Reorder the selected elements (channels or groups) within the current level as a block, while maintaining their relative order.
+        direction = "up" or "down"
         """
         selected_items = [item for item in self.editor_helper.items if item.selected]
         if not selected_items:
@@ -286,11 +282,11 @@ class EditorMainWindow(ThemedScreen):
 
         current_data = self.editor_helper.get_current_data()
 
-        # --- CANALES ---
+        # --- CHANNELS ---
         if isinstance(current_data, dict) and "_channels" in current_data:
             channels = current_data["_channels"]
 
-            # localizar índices de seleccionados
+            # locate indices of selected items
             selected_indices = [
                 i for i, ch in enumerate(channels)
                 if any(ch.get("_unique_id") == item.data.get("_unique_id") for item in selected_items if item.data.get("item_type") == "channel")
@@ -305,10 +301,10 @@ class EditorMainWindow(ThemedScreen):
                         for i in reversed(selected_indices):
                             channels[i + 1], channels[i] = channels[i], channels[i + 1]
 
-        # --- GRUPOS ---
+        # --- GROUPS ---
         if isinstance(current_data, dict):
             keys = list(current_data.keys())
-            # quitar _channels porque no es grupo
+            # remove _channels because it's not a group
             if "_channels" in keys:
                 keys.remove("_channels")
 
@@ -328,9 +324,9 @@ class EditorMainWindow(ThemedScreen):
                         for i in reversed(selected_indices):
                             keys[i + 1], keys[i] = keys[i], keys[i + 1]
 
-                # reconstruir dict con nuevo orden
+                # rebuild dictionary with new order
                 reordered = {}
-                if "_channels" in current_data:  # mantener primero los canales sueltos
+                if "_channels" in current_data:  # # keep the channels clear first
                     reordered["_channels"] = current_data["_channels"]
                 for k in keys:
                     reordered[k] = current_data[k]
@@ -342,7 +338,7 @@ class EditorMainWindow(ThemedScreen):
 
     def _move_channel(self, current_data, channel_data, direction):
         """
-        Mueve un canal en la lista _channels de current_data.
+        Move a channel in the _channels list of current_data.
         """
         if not isinstance(current_data, dict):
             return
@@ -370,7 +366,7 @@ class EditorMainWindow(ThemedScreen):
 
     def _move_group(self, current_data, group_key, direction):
         """
-        Mueve un grupo dentro del dict current_data.
+        Move a group within the current_data dictionary.
         """
         if not isinstance(current_data, dict) or not group_key in current_data:
             return
@@ -385,7 +381,7 @@ class EditorMainWindow(ThemedScreen):
         else:
             return
 
-        # reconstruir dict en el nuevo orden
+        # rebuild the dictionary in the new order
         reordered = {k: current_data[k] for k in keys}
         current_data.clear()
         current_data.update(reordered)
@@ -408,17 +404,17 @@ class EditorMainWindow(ThemedScreen):
 
     def populate_plugins_structure(self, plugin_manager, parent_instance=None):
         """
-        Construye la estructura de diccionario necesaria para DropDownMenuPopup
-        a partir de los plugins del plugin_manager.
-        Se respetan submenús por '/' en el nombre del plugin y en el nombre de la función.
-    
-        Retorna un diccionario {nombre: callback | subdiccionario}.
+        This function builds the dictionary structure required for the DropDownMenuPopup
+        based on the plugins registered with the plugin manager.
+        Submenus are created using '/' as a separator in both the plugin name and the function name.
+
+        It returns a dictionary in the format {name: callback | sub-dictionary}.
         """
         menu_structure = {}
-        submenus_cache = {}  # clave: ruta completa -> subdiccionario
+        submenus_cache = {}  # key: full path -> sub-dictionary
 
         for plugin_name, plugin_data in plugin_manager.get_plugins().items():
-            # Crear la ruta de submenús a partir del nombre del plugin
+            # Create the submenu path based on the plugin name
             parts = plugin_name.split("/")
             path_so_far = ""
             parent_dict = menu_structure
@@ -432,10 +428,10 @@ class EditorMainWindow(ThemedScreen):
 
             plugin_menu_dict = parent_dict
 
-            # Funciones del plugin
+            # Plugin features
             for func_name, func_callback in plugin_data["instance"].get_functions():
                 func_parts = func_name.split("/")
-                func_path_so_far = plugin_name  # inicializar con ruta del plugin
+                func_path_so_far = plugin_name  # Initialize with plugin path
                 parent_func_dict = plugin_menu_dict
 
                 for part in func_parts[:-1]:
@@ -446,7 +442,6 @@ class EditorMainWindow(ThemedScreen):
                     parent_func_dict = submenus_cache[func_path_so_far]
 
                 action_name = func_parts[-1]
-                # Si quieres que las funciones reciban parent_instance como primer argumento:
                 if parent_instance:
                     parent_func_dict[action_name] = partial(func_callback, parent_instance)
                 else:
@@ -474,16 +469,71 @@ class EditorMainWindow(ThemedScreen):
     # -----------------------
     # Import / Export
     # -----------------------
+    def merge_data_with_recure_names(self, imported_data, current_data):
+        """Merge sin sobrescribir grupos, añade sufijos si hay duplicados."""
+        for group_name, group_channels in imported_data.items():
+            if group_name not in current_data:
+                current_data[group_name] = group_channels
+            else:
+                suffix = 1
+                new_name = f"{group_name}_{suffix}"
+                while new_name in current_data:
+                    suffix += 1
+                    new_name = f"{group_name}_{suffix}"
+                current_data[new_name] = group_channels
+        return current_data
+
+
     def import_dialog(self):
-        # placeholder → importación desde archivo, merge o overwrite
-        self.show_popup("Import", "Import dialog not implemented yet.")
+        """Use FileDialog to import correspondence without overwriting existing data."""
+        def on_file_chosen(path):
+            try:
+                _, ext = os.path.splitext(path)
+                ext = ext.lower()
+
+                if ext == ".json":
+                    with open(path, "r", encoding="utf-8") as f:
+                        imported_data = json.load(f)
+
+                elif ext == ".m3u" or ext == ".m3u8":
+                    imported_data = load_file(path, is_new=False)
+
+                else:
+                    self.show_popup("Error", f"Unsupported file type: {ext}")
+                    return
+
+                if not isinstance(imported_data, dict):
+                    self.show_popup("Error", "Invalid file structure.")
+                    return
+
+                current_data = self.editor_helper.get_current_data()
+                if current_data is None:
+                    current_data = {}
+
+                # Merge without overwriting
+                updated = self.merge_data_with_recure_names(imported_data, current_data)
+
+                print(updated)
+
+                # Save changes to the helper
+                self.data = updated
+
+                # Refresh list in the UI
+                self.editor_helper.populate_list()
+
+            except Exception as e:
+                print(f"Error importing data: {e}")
+
+        # Open the FileDialog in "open" mode
+        file_dialog = FileDialog(mode="open", file_types=["*.m3u", "*.m3u8", "*.json"], callback=on_file_chosen)
+        file_dialog.open()
 
     def save_btn_action(self, *args):
         def on_file_selected(full_path):
-            # el filtro lo obtenemos desde el diálogo que se abrió
+            # We obtain the filter from the dialog box that opened.
             selected_filter = file_dialog.filter_spinner.text if file_dialog.filter_spinner else "*.m3u"
 
-            # comprobar extensión
+            # check extension
             _, ext = os.path.splitext(full_path)
             if not ext:
                 if selected_filter and selected_filter != "*.*":
@@ -502,24 +552,24 @@ class EditorMainWindow(ThemedScreen):
                     with open(full_path, "w", encoding="utf-8") as f:
                         json.dump(self.data, f, indent=4, ensure_ascii=False)
                 else:
-                    self.show_popup("Error", f"Extensión no soportada: {ext}")
+                    self.show_popup("Error", f"Unsupported extension: {ext}")
                     return
 
-                self.show_popup("Success", f"Archivo guardado en:\n{full_path}")
+                self.show_popup("Success", f"File saved in:\n{full_path}")
             except Exception as e:
                 self.show_popup("Error", str(e))
 
-        # Crear el diálogo
+        # Create the dialogue
         file_dialog = FileDialog(
             mode="save",
-            title="Guardar archivo",
+            title="Save File",
             callback=on_file_selected,
             default_path=os.getcwd()
         )
         file_dialog.open()
 
     def export_m3u(self, out_file):
-        """Exporta datos en formato M3U."""
+        """Export data in M3U format."""
         try:
             with open(out_file, "w", encoding="utf-8") as f:
                 f.write("#EXTM3U\n")
@@ -532,7 +582,7 @@ class EditorMainWindow(ThemedScreen):
             self.show_popup("Error", str(e))
 
     def export_json(self, out_file):
-        """Exporta datos en formato JSON."""
+        """Export data in JSON format."""
         try:
             with open(out_file, "w", encoding="utf-8") as f:
                 json.dump(self.data, f, indent=4, ensure_ascii=False)

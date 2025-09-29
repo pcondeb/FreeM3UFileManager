@@ -6,10 +6,10 @@ from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from functools import partial
 
-# ---------------------- Items del menú ----------------------
+# ---------------------- Menu items ----------------------
 
 class MenuItem(Button):
-    """Item que ejecuta una función"""
+    """Item that executes a function"""
     def __init__(self, name, callback, popup_ref, **kwargs):
         super().__init__(text=name, size_hint_y=None, height=40, **kwargs)
         self.callback = callback
@@ -18,12 +18,12 @@ class MenuItem(Button):
 
     def on_execute(self, *args):
         self.callback()
-        # cerrar solo este popup
+        # close only this popup
         self.popup_ref.dismiss()
 
 
 class SubMenuItem(Button):
-    """Item que abre un submenú"""
+    """Item that opens a submenu"""
     def __init__(self, name, submenu_structure, root_structure, parent_structure, **kwargs):
         super().__init__(text=f"> {name}", size_hint_y=None, height=40, **kwargs)
         self.submenu_structure = submenu_structure
@@ -41,8 +41,8 @@ class SubMenuItem(Button):
 
 
 class BackItem(Button):
-    """Item para volver al menú anterior"""
-    def __init__(self, parent_structure, root_structure, title="Volver", **kwargs):
+    """Item to go back to the previous menu"""
+    def __init__(self, parent_structure, root_structure, title="Back", **kwargs):
         super().__init__(text="< Back", size_hint_y=None, height=40, **kwargs)
         self.parent_structure = parent_structure
         self.root_structure = root_structure
@@ -51,7 +51,7 @@ class BackItem(Button):
 
     def go_back(self, *args):
         self.dismiss_current()
-        # Abrir el popup del menú padre
+        # Open the parent menu popup
         DropDownMenuPopup(
             self.parent_structure,
             root_structure=self.root_structure,
@@ -74,31 +74,31 @@ class BackItem(Button):
 
 
 class CloseMenuItem(Button):
-    """Item para cerrar el menú completo desde el nivel raíz"""
+    """Item to close the entire menu from the root level"""
     def __init__(self, popup_ref, **kwargs):
         super().__init__(text="Close Menu", size_hint_y=None, height=40, **kwargs)
         self.popup_ref = popup_ref
         self.bind(on_release=self.close_all)
 
     def close_all(self, *args):
-        # cerrar todos los popups activos
+        # close all active popups
         for p in DropDownMenuPopup._active_popups[:]:
             p.dismiss()
 
 
-# ---------------------- Popup del menú ----------------------
+# ---------------------- Menu popup ----------------------
 
 class DropDownMenuPopup(Popup):
-    """Popup con BoxLayout vertical que genera items personalizados"""
+    """Popup with vertical BoxLayout that generates custom items"""
     _active_popups = []
 
-    def __init__(self, structure, root_structure=None, parent_structure=None, title="Menú", **kwargs):
+    def __init__(self, structure, root_structure=None, parent_structure=None, title="Menu", **kwargs):
         super().__init__(title=title, size_hint=(0.8, 0.8), **kwargs)
         self.structure = structure
         self.root_structure = root_structure or structure
         self.parent_structure = parent_structure
 
-        # registrar popup activo
+        # register active popup
         DropDownMenuPopup._active_popups.append(self)
 
         self.layout = BoxLayout(orientation='vertical', spacing=5, padding=5, size_hint_y=None)
@@ -108,11 +108,11 @@ class DropDownMenuPopup(Popup):
         self.content = self.layout
 
         if parent_structure:
-            # Mostrar BackItem si hay un menú padre real (no raíz)
-            back_item = BackItem(parent_structure=parent_structure, root_structure=self.root_structure, title="Menú")
+            # Show BackItem if there is a real parent menu (not root)
+            back_item = BackItem(parent_structure=parent_structure, root_structure=self.root_structure, title="Menu")
             self.layout.add_widget(back_item, index=0)
         else:
-            # Nivel raíz → añadir opción para cerrar menú
+            # Root level → add option to close menu
             self.layout.add_widget(CloseMenuItem(popup_ref=self), index=0)
 
     def build_menu(self):
@@ -128,7 +128,7 @@ class DropDownMenuPopup(Popup):
                 ))
 
     def dismiss(self, *args, **kwargs):
-        # al cerrar este popup, eliminarlo de la lista de activos
+        # when closing this popup, remove it from the active list
         if self in DropDownMenuPopup._active_popups:
             DropDownMenuPopup._active_popups.remove(self)
         super().dismiss(*args, **kwargs)

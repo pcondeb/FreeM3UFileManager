@@ -14,7 +14,7 @@ from app.paths_module import get_user_data_dir
 RECENT_FILE = get_user_data_dir() / "recent_paths.json"
 
 def get_default_locations():
-    """Genera accesos rápidos según el sistema operativo."""
+    """Creates shortcuts depending on the operating system."""
     home = os.path.expanduser("~")
     locations = {
         "Home": home,
@@ -37,7 +37,7 @@ def get_default_locations():
     return {k: v for k, v in locations.items() if os.path.exists(v)}
 
 def load_recent_paths():
-    """Carga historial de rutas recientes."""
+    """Load history of recent routes."""
     if os.path.exists(RECENT_FILE):
         try:
             with open(RECENT_FILE, "r", encoding="utf-8") as f:
@@ -47,7 +47,7 @@ def load_recent_paths():
     return []
 
 def save_recent_path(path):
-    """Guarda la ruta en el historial."""
+    """Save the route to your history."""
     paths = load_recent_paths()
     default_locs = set(get_default_locations().values())
     if path in default_locs:
@@ -60,7 +60,7 @@ def save_recent_path(path):
         json.dump(paths, f)
 
 class FileDialog(Popup):
-    def __init__(self, mode="open", file_types=["*.m3u", "*.json"], title="Select File", default_path="", callback=None, **kwargs):
+    def __init__(self, mode="open", file_types=["*.m3u", "*.m3u8", "*.json"], title="Select File", default_path="", callback=None, **kwargs):
         super().__init__(title=title, size_hint=(0.95, 0.95), **kwargs)
         self.mode = mode
         self.callback = callback
@@ -71,18 +71,18 @@ class FileDialog(Popup):
         # --- Sidebar ---
         sidebar = BoxLayout(orientation="vertical", size_hint_x=0.25, spacing=5)
 
-        sidebar.add_widget(Label(text="Ubicaciones", size_hint_y=None, height=30))
+        sidebar.add_widget(Label(text="Locations", size_hint_y=None, height=30))
         default_locations = get_default_locations()
         for name, path in default_locations.items():
             btn = Button(text=name, size_hint_y=None, height=35)
             btn.bind(on_release=lambda b, p=path: self.change_dir(p))
             sidebar.add_widget(btn)
 
-        sidebar.add_widget(Widget())  # espacio flexible
+        sidebar.add_widget(Widget())
 
         recents = load_recent_paths()
         if recents:
-            sidebar.add_widget(Label(text="Recientes", size_hint_y=None, height=30))
+            sidebar.add_widget(Label(text="Recent", size_hint_y=None, height=30))
             for path in recents:
                 if path in default_locations.values() or not os.path.exists(path):
                     continue
@@ -93,10 +93,10 @@ class FileDialog(Popup):
 
         main_layout.add_widget(sidebar)
 
-        # --- Layout central ---
+        # --- Central layout ---
         central_layout = BoxLayout(orientation="vertical", spacing=5)
 
-        # Label con la ruta actual
+        # Label with the current path
         self.path_label = Label(
             text=default_path or os.getcwd(),
             size_hint_y=None,
@@ -117,11 +117,11 @@ class FileDialog(Popup):
         self.filechooser.bind(path=self.update_path_label)
         central_layout.add_widget(self.filechooser)
 
-        # Input + Spinner en horizontal
+        # Input + Spinner in horizontal layout
         input_layout = BoxLayout(orientation="horizontal", size_hint_y=None, height=30, spacing=5)
 
         self.filename_input = TextInput(
-            text="", multiline=False, hint_text="Nombre de archivo"
+            text="", multiline=False, hint_text="Filename"
         )
         input_layout.add_widget(self.filename_input)
 
@@ -136,21 +136,21 @@ class FileDialog(Popup):
 
         central_layout.add_widget(input_layout)
         if self.mode in ["open"]:
-            self.filename_input.readonly = True  # no editable
+            self.filename_input.readonly = True  # not editable
             self.filename_input.text = ""
 
-        # Botones inferiores
+        # Bottom buttons
         btn_layout = BoxLayout(size_hint_y=None, height=40, spacing=5)
 
-        btn_new_folder = Button(text="Nueva carpeta")
+        btn_new_folder = Button(text="New folder")
         btn_new_folder.bind(on_release=self.create_folder)
         btn_layout.add_widget(btn_new_folder)
 
-        btn_ok = Button(text="Aceptar")
+        btn_ok = Button(text="Accept")
         btn_ok.bind(on_release=self.on_ok)
         btn_layout.add_widget(btn_ok)
 
-        btn_cancel = Button(text="Cancelar")
+        btn_cancel = Button(text="Cancel")
         btn_cancel.bind(on_release=self.dismiss)
         btn_layout.add_widget(btn_cancel)
 
@@ -160,7 +160,7 @@ class FileDialog(Popup):
         self.content = main_layout
 
     def update_path_label(self, instance, value):
-        """Actualizar el label de la ruta cuando cambie el directorio."""
+        """Update the path label when the directory changes."""
         self.path_label.text = value
 
     def change_dir(self, path):
@@ -171,10 +171,10 @@ class FileDialog(Popup):
         self.filechooser.filters = [text]
 
     def create_folder(self, instance):
-        new_folder = os.path.join(self.filechooser.path, "Nueva Carpeta")
+        new_folder = os.path.join(self.filechooser.path, "New folder")
         i = 1
         while os.path.exists(new_folder):
-            new_folder = os.path.join(self.filechooser.path, f"Nueva Carpeta {i}")
+            new_folder = os.path.join(self.filechooser.path, f"New folder {i}")
             i += 1
         os.mkdir(new_folder)
         self.filechooser._update_files()

@@ -25,7 +25,7 @@ class ThemedScreen(Screen):
             self.bg_rect.size = self.size
 
     def set_background_color(self, rgba):
-        """Cambia el color de fondo dinámicamente."""
+        """It dynamically changes the background color."""
         if hasattr(self, "bg_color_instruction"):
             self.bg_color_instruction.rgba = rgba
 

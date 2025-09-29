@@ -68,12 +68,12 @@ class ConfigManager:
 # --- ConfigWindow (Kivy version) ---
 class ConfigWindow(Screen):
     """
-    Configuración principal: general + plugins
-    Filas centradas horizontalmente, columna central fija al 50% de la pantalla.
+    Main settings: general + plugins
+    Rows horizontally centered, center column fixed at 50% of screen width.
     """
 
-    LEFT_WIDTH = 40   # ancho fijo columna izquierda
-    RIGHT_WIDTH = 100  # ancho fijo columna derecha
+    LEFT_WIDTH = 40  
+    RIGHT_WIDTH = 100  
     ROW_HEIGHT = 40
 
     def __init__(self, config_manager, plugin_manager, **kwargs):
@@ -83,7 +83,7 @@ class ConfigWindow(Screen):
         self.plugin_manager = plugin_manager
         self.plugin_widgets = {}
 
-        self.CENTER_WIDTH = Window.width * 0.5  # ancho fijo label central: 50% pantalla
+        self.CENTER_WIDTH = Window.width * 0.5  # Fixed width label, centered: 50% of screen width
 
         root_layout = BoxLayout(orientation="vertical", padding=10, spacing=10)
 
@@ -96,7 +96,7 @@ class ConfigWindow(Screen):
             center_text="Enable dark mode",
             right_widget=None
         )
-        self.dark_mode_cb = row["left"]  # guardamos referencia al checkbox
+        self.dark_mode_cb = row["left"]  # We store a reference to the checkbox.
         root_layout.add_widget(row["layout"])
 
         # --- Plugin Settings ---
@@ -125,17 +125,17 @@ class ConfigWindow(Screen):
 
     def _make_row(self, left_widget=None, center_text="", right_widget=None):
         """
-        Crea una fila centrada horizontalmente con 3 columnas.
-        - left_widget: CheckBox u otro widget, ancho LEFT_WIDTH
-        - center_text: Label centrado, ancho CENTER_WIDTH
-        - right_widget: Button u otro widget, ancho RIGHT_WIDTH
+        Create a horizontally centered row with 3 columns:
+        - left_widget: Checkbox or other widget, width: LEFT_WIDTH
+        - center_text: Centered label, width: CENTER_WIDTH
+        - right_widget: Button or other widget, width: RIGHT_WIDTH
         """
         layout = BoxLayout(orientation="horizontal", size_hint_y=None, height=self.ROW_HEIGHT)
 
-        # espacio flexible a los lados para centrar la fila
+        # flexible space on the sides to center the row
         layout.add_widget(Widget(size_hint_x=1))
 
-        # izquierda
+        # left
         if left_widget is None:
             left_widget = Widget(size_hint=(None, 1), width=self.LEFT_WIDTH)
         else:
@@ -143,13 +143,13 @@ class ConfigWindow(Screen):
             left_widget.width = self.LEFT_WIDTH
         layout.add_widget(left_widget)
 
-        # centro
+        # center
         lbl = Label(text=center_text, size_hint=(None, 1), width=self.CENTER_WIDTH,
                     halign="center", valign="middle")
         lbl.bind(size=lbl.setter("text_size"))
         layout.add_widget(lbl)
 
-        # derecha
+        # right
         if right_widget is None:
             right_widget = Widget(size_hint=(None, 1), width=self.RIGHT_WIDTH)
         else:
@@ -157,18 +157,18 @@ class ConfigWindow(Screen):
             right_widget.width = self.RIGHT_WIDTH
         layout.add_widget(right_widget)
 
-        layout.add_widget(Widget(size_hint_x=1))  # espacio flexible derecho
+        layout.add_widget(Widget(size_hint_x=1))  
 
         return {"layout": layout, "left": left_widget, "center": lbl, "right": right_widget}
 
     def refresh_plugins(self):
-        """Refresca la sección de plugins usando filas centradas con ancho central al 50%."""
+        """Refresh the plugins section using centered rows with a width of 50%."""
         self.plugin_container.clear_widgets()
         enabled_plugins = set(self.config_manager.get_enabled_plugins())
         self.plugin_widgets = {}
 
         for plugin_name, info in self.plugin_manager.available_plugins.items():
-            # Botón Settings
+            # Settings Button
             btn = Button(text="Settings", disabled=True)
             try:
                 temp_instance = info["class"](config_manager=self.config_manager, check_init=True)
@@ -192,19 +192,19 @@ class ConfigWindow(Screen):
             }
             self.plugin_container.add_widget(row["layout"])
 
-        # --- Botón instalar al final (corregido) ---
+        # --- Install button at the bottom ---
         install_btn = Button(text="Install Plugin", size_hint=(None, 1), width=self.CENTER_WIDTH)
         install_btn.bind(on_release=self.install_plugin)
 
-        # Centrar el botón usando BoxLayout horizontal
+        # Center the button using a horizontal BoxLayout.
         install_row = BoxLayout(orientation="horizontal", size_hint_y=None, height=self.ROW_HEIGHT)
-        install_row.add_widget(Widget())  # espacio flexible izquierdo
+        install_row.add_widget(Widget()) 
         install_row.add_widget(install_btn)
-        install_row.add_widget(Widget())  # espacio flexible derecho
+        install_row.add_widget(Widget()) 
         self.plugin_container.add_widget(install_row)
 
     def save_config(self, *_):
-        """Guarda cambios en config y actualiza PluginManager"""
+        """Save changes to the configuration and update PluginManager"""
         self.config_manager.set("dark_mode", str(self.dark_mode_cb.active))
 
         enabled = [name for name, widgets in self.plugin_widgets.items() if widgets["checkbox"].active]
@@ -217,7 +217,7 @@ class ConfigWindow(Screen):
             self.manager.current = "start_window"
 
     def install_plugin(self, *_):
-        """Abre FileDialog para instalar plugin y refresca la UI"""
+        """Open the FileDialog to install the plugin and refresh the UI."""
         if hasattr(self.plugin_manager, "import_plugins"):
             self.plugin_manager.import_plugins(on_complete=self.refresh_plugins)
         else:

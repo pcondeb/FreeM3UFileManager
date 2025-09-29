@@ -12,9 +12,9 @@ class PluginManager:
     def __init__(self, plugin_path="plugins", config: ConfigManager = None):
         self.plugin_path = str(get_plugins_dir("FreeM3UFileManager"))
         self.config = config or ConfigManager()
-        # Diccionario: {plugin_name: {"instance": obj, "active": bool}}
-        self.available_plugins = {}  # info mínima con scan_plugins
-        self.plugins = {}  # instancias cargadas
+        # Dictionary: {plugin_name: {"instance": obj, "active": bool}}
+        self.available_plugins = {}  # minimal info with scan_plugins
+        self.plugins = {}  # loaded instances
 
     def load_plugins(self):
         """Load all .py plugins in plugin_path (recursive)"""
@@ -117,39 +117,39 @@ class PluginManager:
 
 
     def import_plugins(self, on_complete=None):
-        """Abre FileDialog para importar plugins (.py o comprimidos)."""
+        """Open FileDialog to import plugins (.py or compressed)."""
         def callback(path):
             try:
-                # Instala el plugin seleccionado
+                # Install the selected plugin
                 installed_plugins = self._install_plugin_file(path)
 
-                # Refresca la lista mínima de plugins
+                # Refresh the minimal list of plugins
                 self.available_plugins = self.scan_plugins()
-                print(f"[PluginManager] Plugins actualizados tras importar: {list(self.available_plugins.keys())}")
+                print(f"[PluginManager] Plugins updated after import: {list(self.available_plugins.keys())}")
 
-                # Agrega los nuevos plugins instalados al config como habilitados
+                # Add the newly installed plugins to config as enabled
                 enabled = set(self.config.get_enabled_plugins())
                 enabled.update(installed_plugins)
                 self.config.set_enabled_plugins(list(enabled))
 
-                # Llama al callback externo (por ejemplo refresh_plugins) si se pasó
+                # Call external callback (for example refresh_plugins) if provided
                 if on_complete:
                     on_complete()
 
             except Exception as e:
                 print(f"[PluginManager] Error importing {path}: {e}")
 
-        # Abrimos FileDialog **una sola vez**
+        # Open FileDialog **only once**
         FileDialog(
             mode="open",
             file_types=["*.py", "*.zip", "*.tar", "*.tar.gz", "*.tgz", "*.*"],
-            title="Importar Plugin",
+            title="Import Plugin",
             callback=callback
         ).open()
 
 
     def _install_plugin_file(self, filepath):
-        """Instala un archivo de plugin (.py o comprimido). Devuelve lista de nombres de plugins instalados."""
+        """Install a plugin file (.py or compressed). Returns list of installed plugin names."""
         installed_plugins = []
         ext = os.path.splitext(filepath)[1].lower()
         os.makedirs(self.plugin_path, exist_ok=True)
@@ -157,7 +157,7 @@ class PluginManager:
         if ext == ".py":
             dest = os.path.join(self.plugin_path, os.path.basename(filepath))
             shutil.copy(filepath, dest)
-            print(f"[PluginManager] Copiado plugin: {dest}")
+            print(f"[PluginManager] Copied plugin: {dest}")
             installed_plugins.append(os.path.splitext(os.path.basename(dest))[0])
 
         elif ext == ".zip":
@@ -167,7 +167,7 @@ class PluginManager:
                     if f.endswith(".py") and not f.startswith("__"):
                         plugin_name = os.path.splitext(os.path.basename(f))[0]
                         installed_plugins.append(plugin_name)
-            print(f"[PluginManager] Extraído ZIP: {filepath}")
+            print(f"[PluginManager] Extracted ZIP: {filepath}")
 
         elif ext in [".tar", ".gz", ".tgz", ".tar.gz"]:
             with tarfile.open(filepath, "r:*") as tf:
@@ -176,9 +176,9 @@ class PluginManager:
                     if f.endswith(".py") and not f.startswith("__"):
                         plugin_name = os.path.splitext(os.path.basename(f))[0]
                         installed_plugins.append(plugin_name)
-            print(f"[PluginManager] Extraído TAR: {filepath}")
+            print(f"[PluginManager] Extracted TAR: {filepath}")
 
         else:
-            raise ValueError(f"[PluginManager] Formato no soportado: {filepath}")
+            raise ValueError(f"[PluginManager] Unsupported format: {filepath}")
 
         return installed_plugins

@@ -18,7 +18,7 @@ def get_user_data_dir(app_name="FreeM3UFileManager"):
         base = Path(os.getenv("XDG_CONFIG_HOME", Path.home() / ".config"))
         return base / app_name
 
-    elif system == "Java":  # Android con Kivy/Buildozer reporta "Java"
+    elif system == "Java":  # Android with Kivy/Buildozer reports "Java"
         try:
             from android.storage import app_storage_path
             return Path(app_storage_path()) / app_name
@@ -50,7 +50,7 @@ def get_plugins_dir(app_name="FreeM3UFileManager"):
     elif system == "Linux":
         path = Path(os.getenv("XDG_DATA_HOME", Path.home() / ".local/share")) / app_name / "plugins"
 
-    elif system == "Java":  # Android (cuando usas Kivy/Buildozer)
+    elif system == "Java":  # Android (when using Kivy/Buildozer)
         try:
             from android.storage import app_storage_path
             path = Path(app_storage_path()) / app_name / "plugins"
@@ -90,6 +90,6 @@ def get_cache_dir(app_name="FreeM3UFileManager"):
 
 
 def ensure_dir(path: Path):
-    """Crea la carpeta si no existe."""
+    """Create the folder if it does not exist."""
     path.mkdir(parents=True, exist_ok=True)
     return path

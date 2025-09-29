@@ -43,7 +43,7 @@ class AddChannelDialog(Popup):
 
     def __init__(self, channel_data=None, dark_mode=False, on_save=None, **kwargs):
         """
-        :param channel_data: dict con datos existentes (para editar)
+        :param channel_data: dict with existing data (for editing)
         :param dark_mode: bool
         :param on_save: callback(new_data, old_data) -> None
         """
@@ -55,17 +55,17 @@ class AddChannelDialog(Popup):
         self.all_fields = list(self.FIELD_ICONS.keys())
         self.dark_mode = dark_mode
         self.field_edits = {}
-        self.on_save = on_save  # callback al guardar
+        self.on_save = on_save  # callback on save
 
         # --- Main Layout ---
         self.main_layout = BoxLayout(orientation='horizontal', spacing=10, padding=10)
         self.content = self.main_layout
 
-        # Construir formulario y panel derecho
+        # Build form and right panel
         self._build_form()
         self._build_logo_and_buttons()
 
-        # Layout responsive
+        # Responsive layout
         def update_orientation(instance, value):
             if self.width < 600:
                 self.main_layout.orientation = 'vertical'
@@ -78,12 +78,12 @@ class AddChannelDialog(Popup):
 
         self.bind(width=update_orientation)
 
-        # Preview inicial
+        # Initial preview
         logo_url = channel_data.get("tvg-logo") if channel_data else None
         if logo_url:
             self.update_logo_preview(logo_url)
 
-    # ---------------- Formulario scrollable ----------------
+    # ---------------- Scrollable form ----------------
     def _build_form(self):
         scroll = ScrollView(size_hint=(0.7, 1))
         form_layout = GridLayout(cols=1, spacing=5, size_hint_y=None)
@@ -108,7 +108,7 @@ class AddChannelDialog(Popup):
         self.main_layout.add_widget(scroll)
         self.form_scroll = scroll
 
-    # ---------------- Panel derecho: logo + botones ----------------
+    # ---------------- Right panel: logo + buttons ----------------
     def _build_logo_and_buttons(self):
         right_layout = BoxLayout(orientation='vertical', spacing=10, size_hint=(0.3, 1))
 
@@ -118,7 +118,7 @@ class AddChannelDialog(Popup):
 
         right_layout.add_widget(Label(size_hint_y=None, height=20))  # spacer
 
-        # Botones
+        # Buttons
         btn_layout = BoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=80)
         self.ok_button = IconButton(os.path.join("app", "icons", "accept.png"))
         self.cancel_button = IconButton(os.path.join("app", "icons", "cancel.png"))
@@ -127,7 +127,7 @@ class AddChannelDialog(Popup):
         btn_layout.add_widget(self.cancel_button)
         right_layout.add_widget(btn_layout)
 
-        # Conexiones
+        # Connections
         self.ok_button.bind(on_release=self._on_accept)
         self.cancel_button.bind(on_release=self.dismiss)
 
@@ -160,7 +160,7 @@ class AddChannelDialog(Popup):
 
         threading.Thread(target=download, daemon=True).start()
 
-    # ---------------- Aceptar ----------------
+    # ---------------- Accept ----------------
     def _on_accept(self, *args):
         name = self.field_edits["name"].text.strip()
         url = self.field_edits["url"].text.strip()
@@ -169,21 +169,21 @@ class AddChannelDialog(Popup):
 
         new_data = {field: self.field_edits[field].text.strip() for field in self.all_fields}
 
-        # Llamar callback si hay
+        # Call callback if any
         if callable(self.on_save):
             self.on_save(new_data, self.channel_data if self.channel_data else None)
 
         self.dismiss()
 
 
-# ---------------- Botón con icono y fondo ----------------
+# ---------------- Button with icon and background ----------------
 class IconButton(ButtonBehavior, BoxLayout):
     def __init__(self, icon_path, **kwargs):
         super().__init__(orientation='vertical', **kwargs)
         self.padding = 4
         self.spacing = 5
 
-        # Fondo estético
+        # Aesthetic background
         with self.canvas.before:
             from kivy.graphics import Color, RoundedRectangle
             Color(0.25, 0.25, 0.25, 1)

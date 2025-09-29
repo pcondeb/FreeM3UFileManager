@@ -17,7 +17,7 @@ from app.config_manager import ConfigManager
 from app.plugin_manager import PluginManager
 from app.editor_main_window import EditorMainWindow
 from app.file_dialog import FileDialog
-from app.style_manager import style_manager  # Puedes adaptar para Kivy si quieres tema oscuro
+from app.style_manager import style_manager
 from app.paths_module import *
 
 class StartWindow(ThemedScreen):
@@ -36,14 +36,14 @@ class StartWindow(ThemedScreen):
         self.plugin_manager = PluginManager(config=self.config)
         self.plugin_manager.available_plugins = self.plugin_manager.scan_plugins()
 
-        # Activar/desactivar plugins según config
+        # Enable/disable plugins according to config
         enabled_plugins = set(self.config.get_enabled_plugins())
         for plugin_name in self.plugin_manager.get_plugins():
             self.plugin_manager.toggle_plugin(plugin_name, plugin_name in enabled_plugins)
 
         self.last_file = self.config.get("last_file", "")
         self.dark_mode = self.config.get_bool("dark_mode", True)
-        # Aquí podrías aplicar un estilo Kivy si quieres:
+        # Here you could apply a Kivy style if you want:
         self.style_manager = style_manager
         self.style = []
         self.apply_style()
@@ -75,7 +75,7 @@ class StartWindow(ThemedScreen):
         self.new_button.bind(on_release=lambda btn: self.create_new_file())
         self.load_button.bind(on_release=lambda btn: self.load_file())
 
-        # Popup y worker
+        # Popup and worker
         self.loading_popup = None
         self.loader_worker = None
 
@@ -87,7 +87,7 @@ class StartWindow(ThemedScreen):
         bg_color = self.style.get("window_background_color", (0.1, 0.1, 0.1, 1))
         self.set_background_color(bg_color)
 
-    # ------------------- Worker y Loading Popup internos -------------------
+    # ------------------- Internal Worker and Loading Popup -------------------
     class PluginLoaderWorker:
         def __init__(self, plugin_manager, progress_callback, finished_callback):
             self.plugin_manager = plugin_manager
@@ -119,7 +119,7 @@ class StartWindow(ThemedScreen):
         def __init__(self, **kwargs):
             super().__init__(title="Loading...", size_hint=(1,1), auto_dismiss=False, **kwargs)
             layout = BoxLayout(orientation='vertical', spacing=10, padding=20)
-            self.label = Label(text="Loaging plugins...", size_hint_y=None, height=40, font_size=24)
+            self.label = Label(text="Loading plugins...", size_hint_y=None, height=40, font_size=24)
             self.progress = ProgressBar(max=1, value=0, height=20)
             layout.add_widget(self.label)
             layout.add_widget(self.progress)
@@ -128,7 +128,7 @@ class StartWindow(ThemedScreen):
         def set_message(self, msg):
             self.label.text = msg
 
-    # ------------------- Abrir editor con carga asíncrona -------------------
+    # ------------------- Open editor with async loading -------------------
     def open_editor(self, file_path, is_new):
         self.loading_popup = self.LoadingPopup()
         self.loading_popup.open()
@@ -145,16 +145,16 @@ class StartWindow(ThemedScreen):
             self.loading_popup.dismiss()
             self.loading_popup = None
 
-        # Crear y cambiar de Screen
+        # Create and switch Screen
         editor_main_window_screen = EditorMainWindow(file_path, is_new, config=self.config, plugin_manager=self.plugin_manager)
         self.parent.add_widget(editor_main_window_screen)
-        self.parent.current = "editor"  # Transiciona al editor
+        self.parent.current = "editor"  # Switch to editor
 
-    # ------------------- Operaciones normales -------------------
+    # ------------------- Normal operations -------------------
 
     def create_new_file(self):
         def on_file_selected(path):
-            # Aquí podrías inicializar el archivo vacío
+            # Here you could initialize the empty file
             with open(path, "w", encoding="utf-8") as f:
                 f.write("#EXTM3U\n")
             self.config.set("last_file", path)
@@ -193,7 +193,7 @@ class StartWindow(ThemedScreen):
 
     def open_config_window(self):
         from app.config_manager import ConfigWindow
-        # En Kivy podrías usar una pantalla o popup en lugar de exec_()
+        # In Kivy you could use a screen or popup instead of exec_()
         cfg_screen = ConfigWindow(self.config, self.plugin_manager)
         self.parent.add_widget(cfg_screen)
         self.parent.current = cfg_screen.name

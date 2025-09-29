@@ -4,8 +4,8 @@ from kivy.properties import ObjectProperty
 
 class GroupSelector(TreeView):
     """
-    Widget para seleccionar un grupo de la estructura de datos de M3U.
-    Añade un nodo raíz "Top-level" que representa el grupo padre.
+    Widget to select a group from the M3U data structure.
+    Adds a "Top-level" root node representing the parent group.
     """
     selected_path = ObjectProperty(None)
 
@@ -13,18 +13,18 @@ class GroupSelector(TreeView):
         super().__init__(hide_root=True, **kwargs)
         self.data = data
         self.selected_path = []
-        self.root_item = None  # almacenamos referencia al nodo raíz
+        self.root_item = None  # store reference to the root node
         self.populate_tree()
 
     def populate_tree(self):
         self.clear_widgets()
-        # Nodo raíz
+        # Root node
         self.root_item = TreeViewLabel(text="Top-level")
-        self.root_item.path = []  # ruta vacía representa raíz
+        self.root_item.path = []  # empty path represents root
         self.add_node(self.root_item)
         self._add_groups(self.data, parent_node=self.root_item, path=[])
         self.root_item.is_open = True
-        # Bind de selección
+        # Selection binding
         self.bind(selected_node=self.on_select_node)
 
     def _add_groups(self, data_dict, parent_node=None, path=[]):
@@ -34,7 +34,7 @@ class GroupSelector(TreeView):
             node = TreeViewLabel(text=key)
             node.path = path + [key]
             self.add_node(node, parent_node)
-            # Recursivo
+            # Recursive
             if isinstance(value, dict):
                 self._add_groups(value, node, path + [key])
 
@@ -46,13 +46,13 @@ class GroupSelector(TreeView):
         return self.selected_path
 
     def expand_all(self):
-        """Expande todos los nodos a partir del root_item"""
+        """Expands all nodes starting from root_item"""
         if not self.root_item:
             return
 
         def _expand(node):
             node.is_open = True
-            # Recorremos los hijos del nodo
+            # Iterate over node children
             if hasattr(node, 'nodes'):
                 for child in node.nodes:
                     _expand(child)

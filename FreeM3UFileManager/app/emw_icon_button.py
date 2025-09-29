@@ -9,20 +9,20 @@ from kivy.graphics import Color, Rectangle
 
 
 class IconButton(ButtonBehavior, AnchorLayout):
-    """Botón con PNG como icono y background coloreable"""
+    """Button with PNG icon and a customizable background color"""
     def __init__(self, icon_path, **kwargs):
         super().__init__(anchor_x='center', anchor_y='center', **kwargs)
         self.size_hint_y = None
         self.height = 50
         self.icon_path = icon_path
 
-        # canvas para background
+        # canvas for background
         with self.canvas.before:
             self.bg_color = Color(0.2, 0.2, 0.2, 1)  # default
             self.bg_rect = Rectangle(pos=self.pos, size=self.size)
         self.bind(pos=self._update_rect, size=self._update_rect)
 
-        # imagen del icono
+        # icon image
         self.icon = Image(
             source=icon_path,
             size_hint=(None, None),

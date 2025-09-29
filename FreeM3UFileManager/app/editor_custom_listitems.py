@@ -1,7 +1,5 @@
 ﻿# app/editor_custom_listitems.py
 # -*- coding: utf-8 -*-
-# app/editor_custom_listitems.py
-# -*- coding: utf-8 -*-
 import string
 from functools import partial
 from kivy.uix.boxlayout import BoxLayout
@@ -32,20 +30,20 @@ FIELD_ICONS = {
 class CustomListItem(BoxLayout):
     item_type = StringProperty("channel")  # "channel", "group", "back"
     selected = BooleanProperty(False)
-    data = ObjectProperty(None)           # Copia de los datos para mostrar
-    node = ObjectProperty(None)           # Referencia al nodo original (puede ser dict)
-    key_path = ListProperty([])           # Path dentro de editor_window.data
+    data = ObjectProperty(None)           # Copy of the data to display
+    node = ObjectProperty(None)           # Reference to the original node (can be a dictionary)
+    key_path = ListProperty([])           # Path inside editor_window.data
 
     def __init__(self, data=None, style=None, **kwargs):
         super().__init__(orientation="horizontal", size_hint_y=None, height=70, **kwargs)
         self.data = data or {}
-        self.node = data                     # Nodo original que se quiere modificar
+        self.node = data                     # Original node that needs to be modified
         self.item_type = self.data.get("item_type", "channel")
         self.style = style or {}
         self.selected = False
-        self.key_path = []                   # Se asigna luego en populate_list
+        self.key_path = []                   
 
-        # Widgets internos
+        # Internal widgets
         self.icon_widget = None
         self.text_label = None
         self.open_btn = None
@@ -59,7 +57,7 @@ class CustomListItem(BoxLayout):
     def build_ui(self):
         self.clear_widgets()
 
-        # --- Icono principal ---
+        # --- Main Icon ---
         if self.item_type == "channel":
             logo_url = self.data.get("tvg-logo") or self.data.get("logo")
             if logo_url:
@@ -74,11 +72,11 @@ class CustomListItem(BoxLayout):
             self.icon_widget = Image(source=f"{ICON_PATH}unknown.png", size_hint_x=None, width=70)
         self.add_widget(self.icon_widget)
 
-        # --- Texto principal ---
+        # --- Main text ---
         self.text_label = Label(text=self.data.get("name", "Unnamed"), halign="left", valign="middle")
         self.add_widget(self.text_label)
 
-        # --- Grupo: contador + botones ---
+        # --- Group: counter + buttons ---
         if self.item_type == "group":
             children = self.data.get("children", {})
             channel_count = 0
@@ -99,7 +97,7 @@ class CustomListItem(BoxLayout):
             self.add_widget(self.edit_btn)
             self.add_widget(self.open_btn)
 
-        # --- Canal: indicadores + editar ---
+        # --- Channel: indicators + edit ---
         elif self.item_type == "channel":
             self.indicators_box = BoxLayout(orientation="horizontal", size_hint_x=None, width=150)
             for field, icon_path in FIELD_ICONS.items():
@@ -175,7 +173,7 @@ class BorderedIconButton(BoxLayout):
 
 
 class EditorCustomQListItems:
-    """Helper para poblar BoxLayout dentro de ScrollView con items custom desde un dict/list JSON"""
+    """Helper to populate a BoxLayout within a ScrollView with custom items from a JSON dictionary/list"""
     def __init__(self, container, style=None, parent=None):
         self.container = container
         self.parent = parent
@@ -185,13 +183,13 @@ class EditorCustomQListItems:
         self.style = style or {}
 
     def set_style(self, style):
-        """Cambia estilo en runtime"""
+        """Change style at runtime"""
         self.style = style
         for item in self.items:
             item.apply_style(style)
 
     # -----------------------
-    # Cargar y mostrar datos
+    # Load and display data
     # -----------------------
     def load_data(self, data):
         self.data_root = data
@@ -205,7 +203,7 @@ class EditorCustomQListItems:
         return ref
 
     def populate_list(self):
-        # Guardar selección actual
+        # Save current selection
         selected_ids = {item.data.get("_unique_id") for item in self.items if item.selected}
 
         self.container.clear_widgets()
@@ -219,11 +217,11 @@ class EditorCustomQListItems:
                 style=self.style
             )
             back_item.bind(on_touch_down=lambda i, t: self.go_back() if back_item.collide_point(*t.pos) else False)
-            # Back no se selecciona nunca
+            # Back is never selected.
             self.items.append(back_item)
             self.container.add_widget(back_item)
 
-        # --- Grupos ---
+        # --- Groups ---
         if isinstance(data, dict):
             for k, v in data.items():
                 if k == "_channels":
@@ -237,7 +235,7 @@ class EditorCustomQListItems:
                     "_display_name": k
                 }
                 group_item = CustomListItem(data=group_data, style=self.style)
-                # Restaurar selección
+                # Restore selection
                 if group_data["_unique_id"] in selected_ids:
                     group_item.set_selected(self.style, True)
 
@@ -252,7 +250,7 @@ class EditorCustomQListItems:
                 self.items.append(group_item)
                 self.container.add_widget(group_item)
 
-        # --- Canales ---
+        # --- Channels ---
         channels = []
         if isinstance(data, dict) and "_channels" in data:
             channels = data["_channels"]
@@ -260,14 +258,14 @@ class EditorCustomQListItems:
             channels = data
 
         for ch in channels:
-            # Añadir identificadores y nombre visible
+            # Add identifiers and display name
             full_path = "::".join(self.current_path)
             ch["_unique_id"] = f'{full_path}::{ch.get("name","Unknown")}::{ch.get("url","")}'
             ch["_display_name"] = ch.get("name", "Unknown")
 
         for ch in channels:
             ch_item = CustomListItem(data={**ch, "item_type": "channel"}, style=self.style)
-            # Restaurar selección
+            # Restore selection
             if ch["_unique_id"] in selected_ids:
                 ch_item.set_selected(self.style, True)
 
@@ -278,7 +276,7 @@ class EditorCustomQListItems:
             self.container.add_widget(ch_item)
 
     # -----------------------
-    # Navegación
+    # Navigation
     # -----------------------
     def open_group(self, group_data, _=None):
         self.current_path.append(group_data["key"])
@@ -293,7 +291,7 @@ class EditorCustomQListItems:
     # Selección
     # -----------------------
     def _on_item_touch(self, instance, touch):
-        # Si instance es un botón hijo, subir hasta el CustomListItem contenedor
+        # If the instance is a child button, navigate up to the CustomListItem container.
         if not isinstance(instance, CustomListItem):
             instance = instance.parent
             while instance and not isinstance(instance, CustomListItem):
@@ -334,10 +332,10 @@ class EditorCustomQListItems:
                     item.set_selected(self.style, select_value)
 
     # -----------------------
-    # Modificación de datos
+    # Data modification
     # -----------------------
     def add_item(self, data):
-        """Agrega un nuevo item (canal o grupo) respetando _unique_id y _display_name"""
+        """Add a new item (channel or group) while respecting the _unique_id and _display_name."""
         # Si es canal
         if data.get("item_type") == "channel":
             data["_unique_id"] = f'{data.get("name","Unknown")}::{data.get("url","")}'
