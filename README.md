@@ -12,9 +12,8 @@ https://fm3ufm.southcounty.dev/
 ## 📁 Repository Structure
 
 - `FreeM3UFileManager/` – The main Python project with all the code.  
-- `executable_window/` – A ZIP containing the executable and all necessary files for running the app without Python.  
 - `LegacyPlugins/` – Default plugins included with the app.  
-- `WindowsInstallerWithPlugins/` – Installer executable for Windows including plugins.  
+- `ExamplePLugins/` – Example plugins included with the app to learn how to make your own plugin.
 
 ---
 
